@@ -1,0 +1,199 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Archétypes de joueurs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a mission briefing. Where it stands first, then the four dossiers, the tree, the eyes, the handicap, the result, the bill. */
+:root {
+  --bg: #eef1ee; --panel: #fbfcfa; --fg: #17211d; --muted: #566359; --line: #cfd8d1;
+  --accent: #0f6b5c; --warn: #9a5a00; --bad: #a93a2a; --ok: #1d7a4c; --ask: #fdf1d3; --ask-line: #d1a02f; --cell-ok: #d6ecdf; --cell-mid: #f6e8c4; --cell-bad: #f4d6cd;
+  --display: "Bricolage Grotesque", "Avenir Next", Arial, sans-serif; --body: "Figtree", "Helvetica Neue", Arial, sans-serif; --mono: "JetBrains Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111815; --panel: #1a2320; --fg: #e8efe9; --muted: #9db0a4; --line: #2f3c36;
+  --accent: #5cc7b2; --warn: #e2ab5a; --bad: #ee8f7c; --ok: #6fce9b; --ask: #352a10; --ask-line: #a07d22; --cell-ok: #1f3a2c; --cell-mid: #40341a; --cell-bad: #4a2a22; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111815; --panel: #1a2320; --fg: #e8efe9; --muted: #9db0a4; --line: #2f3c36;
+  --accent: #5cc7b2; --warn: #e2ab5a; --bad: #ee8f7c; --ok: #6fce9b; --ask: #352a10; --ask-line: #a07d22; --cell-ok: #1f3a2c; --cell-mid: #40341a; --cell-bad: #4a2a22; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font: 17px/1.5 var(--body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+.wrap > * { min-width: 0 }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.12; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 6vw, 3.1rem); font-weight: 800; }
+h2 { font-size: 1.55rem; font-weight: 800; }
+h3 { font-size: 1.12rem; font-weight: 600; }
+p { margin: 0; max-width: 70ch; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 74ch; }
+section, header { display: grid; gap: 14px; min-width: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .93rem; }
+.lede { font-size: 1.18rem; }
+code, .k { font: 500 .84em var(--mono); overflow-wrap: anywhere; }
+.ask { background: var(--ask); border: 1px solid var(--ask-line); padding: 18px; display: grid; gap: 12px; }
+.note { background: var(--panel); border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 8px; }
+.tag { font: 500 .72rem var(--mono); text-transform: uppercase; letter-spacing: .05em; border: 1px solid currentColor; padding: 1px 6px; white-space: nowrap; }
+.fact { color: var(--ok); } .mine { color: var(--warn); } .prop { color: var(--accent); }
+.dossiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+.dossier { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--accent); padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.dossier dl { margin: 0; display: grid; gap: 7px; font-size: .95rem; }
+.dossier dt { font: 500 .7rem var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.dossier dd { margin: 0; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; }
+th { font: 500 .72rem var(--mono); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); text-align: left; vertical-align: bottom; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mx td { font-size: .86rem; }
+.ok { background: var(--cell-ok); } .mid { background: var(--cell-mid); } .ko { background: var(--cell-bad); }
+.loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; list-style: none; padding: 0; max-width: none; counter-reset: s; }
+.loop li { background: var(--panel); border: 1px solid var(--line); padding: 10px 12px; counter-increment: s; font-size: .94rem; }
+.loop li::before { content: counter(s); font: 800 1.2rem var(--display); color: var(--accent); display: block; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="muted small">Undercover Grandpa · plan mis à jour le 2 novembre 2026 · quatre joueurs types décidés, prédateur sans arme en cours d'écriture</p>
+    <h1>Des robots qui jouent comme des joueurs</h1>
+    <p class="lede">Quatre joueurs types qui ne voient que l'écran, jugent ce qui est faisable et se trompent à un degré réglable. Quand ils échouent, ils repartent du passage qui bloque avec une autre idée. On obtient, pour chaque mission, les passages qui résistent et tout ce qui a été essayé.</p>
+  </header>
+
+  <section class="ask">
+    <h2>Une question sur le prédateur</h2>
+    <p><strong>Un garde assommé se relève après 2 minutes de jeu</strong> <span class="tag fact">Lu dans le code</span> (<code>KnockoutSeconds</code> = 120 s). Les gardes étant répartis sur plusieurs étages, les avoir tous à terre en même temps sera peut-être impossible. Je ne change pas le jeu. Le robot chasse tous ceux qu'il peut, puis termine la mission, et le tableau donne deux chiffres : combien de gardes il a assommés en tout, et combien étaient à terre au même moment. Si le chiffre vous déçoit, c'est à vous de voir si la durée doit changer.</p>
+  </section>
+
+  <section>
+    <h2>1. Les quatre joueurs types</h2>
+    <p>Chacun cherche à gagner la mission. Il diffère par ce qu'il s'autorise et par sa réaction à l'échec.</p>
+    <div class="dossiers">
+      <article class="dossier"><h3>Prédateur sans arme <span class="tag prop">En cours</span></h3><dl>
+        <dt>Ce qu'il cherche</dt><dd>Assommer tous les gardes, puis finir la mission.</dd>
+        <dt>Ses outils</dt><dd>Assommer de dos, lancer des pièces, cacher les corps. Ni outil ni arme. Les clés et les objets de mission restent permis.</dd>
+        <dt>Comment il décide</dt><dd>Il prend le garde le plus proche qu'il peut rejoindre par derrière, attend qu'il lui tourne le dos, frappe, puis cache le corps s'il a le temps.</dd>
+        <dt>Faisable ?</dt><dd>Un chemin hors des cônes jusqu'à un dos. Pour deux gardes qui se surveillent, il lance une pièce ou revient plus tard.</dd>
+        <dt>Quand ça rate</dt><dd>Il fuit vers une cachette ou une grille, attend la fin de l'alerte, puis reprend.</dd></dl></article>
+      <article class="dossier"><h3>Prédateur armé, le bourrin</h3><dl>
+        <dt>Ce qu'il cherche</dt><dd>La même chose, un cran au-dessus.</dd>
+        <dt>Ses outils</dt><dd>Le pistolet à fléchettes seulement. Il doit le trouver. Il peut être vu.</dd>
+        <dt>Comment il décide</dt><dd>Il cherche d'abord le pistolet. Ensuite, il se bat à l'alerte : il tire sur ce qui approche, compte ses fléchettes et le temps de sommeil.</dd>
+        <dt>Faisable ?</dt><dd>Assez de fléchettes pour les gardes en vue, et la mission finissable avant le réveil du premier.</dd>
+        <dt>Quand ça rate</dt><dd>Sans fléchette, il recharge ou redevient prédateur sans arme.</dd></dl></article>
+      <article class="dossier"><h3>L'émergent</h3><dl>
+        <dt>Ce qu'il cherche</dt><dd>Faire travailler les systèmes du jeu pour lui.</dd>
+        <dt>Ses outils</dt><dd>Déguisement, sabotage, conduits, drogues, diversions, feu, enfermer des personnages, cacher leurs objets pour les retarder.</dd>
+        <dt>Comment il décide</dt><dd>Il part de ce qui lui manque, cherche ce qui peut écarter la personne gênante, le déclenche et regarde qui bouge.</dd>
+        <dt>Faisable ?</dt><dd>Pour chaque étape : ai-je le moyen, le geste a-t-il eu un effet, assez longtemps pour passer ?</dd>
+        <dt>Quand ça rate</dt><dd>Il change de moyen, et note que celui-ci ne marche pas sur cette personne.</dd></dl></article>
+      <article class="dossier"><h3>Le fantôme</h3><dl>
+        <dt>Ce qu'il cherche</dt><dd>N'exister pour personne.</dd>
+        <dt>Interdit</dt><dd>Être vu, se déguiser, tirer, assommer, tout contact direct, et tout ce qui fait dire « quelqu'un a fait ça », comme une vanne trouvée fermée, sauf ce qui passe pour un accident.</dd>
+        <dt>Permis</dt><dd>Le vol tant qu'on ne le voit pas prendre : on croit à un voisin.</dd>
+        <dt>Faisable ?</dt><dd>Un trajet entier hors des cônes, marge comprise, avant son heure limite.</dd>
+        <dt>Quand ça rate</dt><dd>Vu, sa partie est notée en échec et il continue, pour mesurer la suite.</dd></dl></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. L'arborescence : repartir du passage qui bloque</h2>
+    <p>Chaque mission est coupée en quelques vrais passages, pas en 14 étapes. À chaque échec, le robot repart du début de ce passage, sans refaire la partie, avec une autre idée. Il note ce qui a marché et ce qui n'a pas marché.</p>
+    <div class="scroll"><table style="min-width:640px">
+      <tr><th style="width:30%">Passages du prédateur</th><th>Il est franchi quand</th></tr>
+      <tr><td><strong>La chasse</strong></td><td>Il a assommé tous les gardes qu'il a pu trouver. Ce passage ne bloque pas la suite : un garde hors d'atteinte est noté.</td></tr>
+      <tr><td><strong>La clé du directeur</strong></td><td>Il a la clé du classeur, en assommant Malvo puis en le fouillant.</td></tr>
+      <tr><td><strong>Le plan</strong></td><td>Il entre dans le bureau, ouvre le classeur et prend la photo. Mission gagnée.</td></tr>
+    </table></div>
+    <h3>Les idées essayées à un passage</h3>
+    <div class="scroll"><table style="min-width:560px">
+      <tr><th style="width:30%">Famille</th><th>Exemples</th><th style="width:16%">Branches</th></tr>
+      <tr><td><strong>Le moment</strong></td><td>Il attend 5, 15 ou 30 s avant de repartir : le garde a tourné.</td><td class="num">3</td></tr>
+      <tr><td><strong>Le chemin</strong></td><td>Une autre cible d'abord, ou l'autre côté de la pièce.</td><td class="num">2</td></tr>
+      <tr><td><strong>La diversion</strong></td><td>Une pièce lancée près du garde, puis loin de lui.</td><td class="num">2</td></tr>
+      <tr><td><strong>La première tentative</strong></td><td>Le choix du robot, sans contrainte.</td><td class="num">1</td></tr>
+    </table></div>
+    <div class="note">
+      <p><strong>Les limites déclarées</strong> <span class="tag mine">À ajuster à l'usage</span> : 8 branches au plus par passage, 3 minutes de jeu au plus par branche, 40 branches au plus par partie. Une limite atteinte est écrite dans le résultat : « pas trouvé en 8 essais » ne veut pas dire « impossible ».</p>
+      <p><strong>Comment il reprend :</strong> par rejeu. Le jeu n'a pas de sauvegarde de partie complète, et en écrire une toucherait tout le code. Le robot enregistre chaque geste avec son instant, reconstruit la partie et rejoue ces gestes jusqu'au début du passage. Il garde aussi une copie de son carnet à cet instant.</p>
+      <p><strong>Est-ce déterministe ?</strong> Le jeu l'est, et les salles comptent déjà dessus. Je le vérifie à chaque reprise : une empreinte de la partie (positions, temps, état) est comparée à celle de l'original. Si elles diffèrent, la branche est marquée « reprise fausse » et ne compte pas.</p>
+      <p><strong>Plusieurs blocages :</strong> un passage bloqué en cache peut-être un autre. Dans ce cas, le banc peut donner l'objet manquant au robot, uniquement pour voir la suite. La branche est marquée « coup de pouce » et ne compte jamais comme une victoire.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Un vrai processus de décision</h2>
+    <ol class="loop">
+      <li><strong>Voir.</strong> Il reçoit ce que l'écran montre.</li>
+      <li><strong>Se souvenir.</strong> Il met à jour son carnet.</li>
+      <li><strong>Réagir.</strong> Danger proche ? Il fuit ou se cache.</li>
+      <li><strong>Choisir.</strong> Ce qu'il lui manque, et la voie qui vaut le mieux pour son type.</li>
+      <li><strong>Agir.</strong> Le déplacement et les vrais boutons, rien d'autre.</li>
+    </ol>
+    <p>Le cerveau du robot ne reçoit jamais la simulation. Il reçoit une fiche, la « vue du joueur », et ne peut rien lire d'autre. Une seule pièce du code a le droit de regarder la simulation : celle qui remplit la fiche. C'est donc là qu'on vérifie les triches.</p>
+    <div class="scroll"><table style="min-width:640px">
+      <tr><th style="width:50%">Sur la fiche, car le joueur le voit</th><th>Interdit, car le joueur ne le voit pas</th></tr>
+      <tr><td>Les gens dans le cadre de la caméra, à son étage : place, sens du regard, tenue</td><td>Ceux des autres étages ou hors du cadre</td></tr>
+      <tr><td>Les cônes de sa pièce, comme à l'écran</td><td>Les cônes des autres pièces</td></tr>
+      <tr><td>Les marques « ? » et « ! », les bulles, la sirène</td><td>La jauge exacte de soupçon, ce que le garde a en tête</td></tr>
+      <tr><td>Les boutons d'action affichés</td><td>Un bouton qui n'est pas affiché à ce moment</td></tr>
+      <tr><td>Le plan, les grilles connues, la carte d'objectifs et ses indices</td><td>Les grilles secrètes pas encore trouvées, le futur</td></tr>
+    </table></div>
+    <h3>Où ça reste une triche</h3>
+    <ul>
+      <li><strong>Les idées sont écrites par moi.</strong> La plus importante. Le robot n'invente pas une combinaison à laquelle personne n'a pensé.</li>
+      <li><strong>Il ne regarde pas l'image.</strong> Un garde peu lisible à l'œil reste vu : la lisibilité n'est pas testée.</li>
+      <li><strong>Il connaît le plan et les buts</strong> dès le départ, comme quelqu'un qui a beaucoup joué.</li>
+      <li><strong>Il garde les mesures exactes</strong> tant que les erreurs sont à zéro.</li>
+      <li><strong>La taille du cadre de caméra est calculée,</strong> pas lue à l'écran. Le joueur peut zoomer, le robot garde le réglage de base.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>4. Le niveau de jeu : trois réglages</h2>
+    <p>Valeurs de départ <span class="tag mine">Estimé</span>, à caler sur vos parties.</p>
+    <div class="scroll"><table style="min-width:680px">
+      <tr><th style="width:36%">Réglage</th><th>Parfait</th><th>Bon</th><th>Moyen</th><th>Maladroit</th></tr>
+      <tr><td><strong>Réaction</strong><br><span class="small muted">il agit sur ce qu'il a vu il y a…</span></td><td class="num">0 s</td><td class="num">0,25 s</td><td class="num">0,5 s</td><td class="num">0,9 s</td></tr>
+      <tr><td><strong>Erreurs</strong><br><span class="small muted">cône mal jugé · écart de trajet</span></td><td class="num">0° · 0 m</td><td class="num">3° · 0,3 m</td><td class="num">8° · 0,7 m</td><td class="num">15° · 1,2 m</td></tr>
+      <tr><td><strong>Qualité de décision</strong><br><span class="small muted">choix non optimaux · gens suivis en même temps</span></td><td class="num">0 % · tous</td><td class="num">5 % · 5</td><td class="num">20 % · 3</td><td class="num">40 % · 2</td></tr>
+    </table></div>
+    <p>« Parfait » répond à : la mission est-elle faisable, même avec une réactivité surhumaine ? Si Parfait échoue, c'est la voie ou le jeu qui bloque. Si Parfait gagne et Moyen échoue, c'est une question de difficulté. Le hasard du handicap a son propre tirage, séparé de celui du jeu, pour que la partie se rejoue à l'identique.</p>
+  </section>
+
+  <section>
+    <h2>5. Le résultat à montrer</h2>
+    <p>Pour chaque mission : les passages qui bloquent, leur nombre et les façons essayées. Une mission sans solution trouvée le dit nettement. <strong>Maquette : ces lignes sont inventées.</strong></p>
+    <div class="scroll"><table class="mx" style="min-width:680px">
+      <tr><th style="width:22%">Exemple inventé</th><th>Passage</th><th>Verdict</th><th>Essais</th></tr>
+      <tr><td rowspan="2"><strong>Une mission · prédateur · Bon</strong><br>1 passage bloquant</td><td>La chasse</td><td class="ok">Franchi : 5 gardes assommés sur 8, 3 à terre au même moment</td><td>2 branches : direct ✗, attendre 15 s ✓</td></tr>
+      <tr><td>La clé du directeur</td><td class="ko">Bloque : pas de solution en 8 essais</td><td>direct ✗, attendre 5, 15, 30 s ✗, pièce près ✗, pièce loin ✗…</td></tr>
+    </table></div>
+    <ul>
+      <li><strong>Missions :</strong> la mission principale et les 15 salles d'entraînement.</li>
+      <li><strong>Pas un test vert ou rouge :</strong> ce tableau informe, il n'entre pas dans la suite. Il ne change ni le film, ni l'aventure, ni leurs tests.</li>
+      <li><strong>Étude d'émergence :</strong> chemins gagnants différents, ouvertures créées par une chaîne, visibilité, boutons pressés. <span class="tag prop">Proposition</span> envoyée à <em>Outils · mesure de l'émergence</em>, pas encore confirmée. Durée d'une mission, pas une journée entière.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Le coût</h2>
+    <div class="scroll"><table style="min-width:560px">
+      <tr><th>Morceau</th><th style="width:22%">Jours de session</th></tr>
+      <tr><td><strong>Le socle et le prédateur sans arme,</strong> arborescence comprise</td><td class="num">3</td></tr>
+      <tr><td><strong>Les trois autres :</strong> l'armé est le plus court, l'émergent le plus long</td><td class="num">3 à 5</td></tr>
+      <tr><td><strong>Caler les niveaux,</strong> accorder le tableau avec l'étude</td><td class="num">1</td></tr>
+      <tr><td><strong>Total</strong> <span class="tag mine">Estimé</span></td><td class="num"><strong>7 à 9</strong></td></tr>
+    </table></div>
+    <div class="scroll"><table style="min-width:620px">
+      <tr><th style="width:44%">Calcul</th><th>Durée</th><th style="width:30%">Origine</th></tr>
+      <tr><td>Une partie du robot actuel, 416 s de jeu, hors Unity</td><td class="num">5,7 s</td><td><span class="tag fact">Mesuré</span> une fois</td></tr>
+      <tr><td>Mission : 4 types × 4 niveaux × 4 départs, chaque arbre au plus 40 branches</td><td class="num">≤ 30 min</td><td><span class="tag mine">Estimé</span> au pire, 8 à la fois</td></tr>
+      <tr><td>15 salles, mêmes multiplications, chaque arbre au plus 8 branches</td><td class="num">≤ 30 min</td><td><span class="tag mine">Estimé</span> au pire, 8 à la fois</td></tr>
+      <tr><td><strong>Tableau complet, hors Unity</strong></td><td class="num"><strong>≤ 1 h</strong></td><td><span class="tag mine">Estimé</span></td></tr>
+      <tr><td>Le même dans Unity, qui reste l'arbitre</td><td class="num">2 à 3 h</td><td><span class="tag mine">Estimé</span> sans mesure de vitesse</td></tr>
+    </table></div>
+    <p class="small">Unity a déjà démenti le banc sur l'aventure, sans cause trouvée. Le banc sert à construire, Unity donne les chiffres qu'on retient. Un tableau complet ne part qu'avec votre accord et sa durée.</p>
+  </section>
+</div>
+
+</body></html>
