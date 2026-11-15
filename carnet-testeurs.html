@@ -27,6 +27,7 @@
   --bg:#0e1412; --surface:#151d1a; --sunk:#1c2622; --ink:#e3ebe8; --ink2:#b4c2bd; --muted:#8a9b95; --rule:#2b3833;
   --accent:#4fd1a8; --accent-soft:#16352b; --hl:#4fd1a8; --good:#5fcf8e; --warn:#f0b04a; --crit:#ff7a6e; --example:#b39cf5; --example-soft:#2a2340; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
 .wrap{max-width:1280px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
@@ -204,10 +205,11 @@ blockquote footer{font-size:12px;color:var(--muted);margin-top:4px}
         <tr><td><b>Parties</b><br><span class="small">Cloud Save</span></td><td><code>fetch-recordings.sh</code>, puis un script qui lit les fichiers (quelques secondes).</td><td>Trajets, gardes et dormeurs image par image (10 par seconde), cônes de vue, « ? » et « ! », bruits, alarmes, captures. C'est la seule source des cartes animées.</td><td>Aujourd'hui seules les parties avec un échec partent. Le bouton « Avec les réussites » montre ce que donnerait leur envoi (ici, grâce à la copie du téléphone).</td></tr>
         <tr><td><b>Analytics</b><br><span class="small">Unity Cloud</span></td><td>Requête SQL dans le SQL Data Explorer, export CSV.</td><td>Entonnoir, réussite, essais, temps, causes, notes, réponses aux cases, pour tous les testeurs.</td><td>Rien : les positions viennent des parties.</td></tr>
         <tr><td><b>Mails</b></td><td>Collés dans la conversation, rangés par numéro de testeur et niveau.</td><td>Citations, ressentis, bugs.</td><td>Rien.</td></tr>
-        <tr><td><b>Plans</b><br><span class="small">le jeu</span></td><td><code>NpcLevelPlans.cs</code> (<code>plans.trigger</code>).</td><td>Le fond de carte.</td><td>Plans du 30 oct. : à refaire pour les 15 entraînements, avec l'échelle écrite dans le fichier. En attendant, seul Le cône a ses murs intérieurs.</td></tr>
+        <tr><td><b>Plans</b><br><span class="small">le jeu</span></td><td><code>NpcLevelPlans.cs</code> (<code>plans.trigger</code>).</td><td>Le fond de carte.</td><td>Pour la maquette, le décor des entraînements 1 à 6 et 10 est relu dans les fiches des salles et le code. La version finale le prendra directement du jeu.</td></tr>
       </table></div>
       <h3>Lire une carte</h3>
       <ul>
+        <li>Le plan est orienté comme l'écran du jeu (caméra Yaw 180) : par rapport aux plans du site, il est tourné d'un demi-tour. Le décor vient des fiches des salles (<code>Resources/RoomSheets</code>) ou, sans fiche, du code.</li>
         <li>Rond vert : l'espion. Rond orange avec un cône : un garde et ce qu'il voit. Rectangle : un dormeur.</li>
         <li>« ? » jaune : le garde se pose une question, l'anneau se remplit avec son doute. « ! » rouge : alarme. Trait blanc : il voit l'espion.</li>
         <li>Cercles bleus : un bruit et la distance à laquelle on l'entend. Onde rouge : l'alarme qui se propage.</li>
@@ -243,17 +245,25 @@ const VERDICTS = {
   5:{s:'good',t:"Passé du premier coup (1 séance).",p:["Un bruit de coups a attiré le garde, qui est retourné à son poste."]},
   6:{s:'none',t:"Partie interrompue après 4 s : rien à conclure.",p:["Ce fichier ne se rejoue plus à l'identique avec le code actuel (le banc le signale)."]},
 };
-const SCALE = 4.4, OX = 731, OY = 262, LX0 = 685, SPACING = 600;
+/* The plan as the player sees it: the game's camera looks north (NpcCameraSettings, Yaw 180), so the code's east is on the left
+   and its north at the bottom — the room turned half a turn from a north-up drawing. 4.4 px per unit (1 unit = 0,2 m). */
+const SCALE = 4.4, SPACING = 600;
 const floorOf = t => ({1:3,2:4,3:5,4:3,5:4,6:5})[t] || 3;
-const sx = (x,t) => OX + ((x - (floorOf(t) - 3) * SPACING) - LX0) * SCALE;
-const sy = y => OY - y * SCALE;
+const LX = lx => 414 - lx * SCALE, LY = ly => 262 + ly * SCALE;           // the floor's local coordinates → the plan
+const sx = (x,t) => LX(x - (floorOf(t) - 2) * SPACING);                    // the recordings' one big plane → the plan
+const sy = y => LY(y);
+const dirOf = a => Math.PI - a;                                            // a facing (radians) → the plan's angle
 const OUTER = [[62,438,709,438],[709,438,709,297],[709,297,753,297],[753,297,753,227],[753,227,709,227],[709,227,709,86],[709,86,62,86],[62,86,62,227],[62,297,62,438],[62,227,18,227],[18,227,18,297],[18,297,62,297]];
-const INNER1 = [[102,183,352,26],[102,315,352,26],[524,121,44,35],[524,368,44,35]];
+/* Each room's inside, in the floor's local coordinates: from its sheet (Resources/RoomSheets) or, without one, from the code. */
+const GEO = {"1":{"blocks":[[-58,12,22,18],[-58,-18,22,-12],[38,24,48,32],[38,-32,48,-24]],"beds":[],"puddles":[[74,0,4]],"cams":[],"snow":false,"rooms":[],"src":"code (NpcTraining.cs, Le c\u00f4ne)"},"2":{"blocks":[],"beds":[[68.0,30.0],[68.0,18.0],[68.0,-30.0],[28.0,30.0],[28.0,18.0],[28.0,-18.0],[28.0,-30.0],[8.0,18.0],[8.0,-18.0],[8.0,-30.0],[-12.0,30.0],[-12.0,18.0],[-12.0,-18.0],[-12.0,-30.0],[-47.0,30.0],[-47.0,18.0],[-47.0,-18.0],[-47.0,-30.0],[48.0,30.0],[48.0,-30.0],[-29.0,30.0],[-29.0,-30.0]],"puddles":[],"cams":[],"snow":false,"rooms":[],"src":"fiche Training-Dorm"},"3":{"blocks":[[-25.0,-6.0,-18.0,6.0],[-25.0,-24.0,-18.0,-14.0]],"beds":[[-55.0,-28.0],[-35.0,28.0],[45.0,28.0],[45.0,-14.0],[45.0,-28.0],[60.0,28.0]],"puddles":[],"cams":[],"snow":false,"rooms":[],"src":"fiche Training-Snooze"},"4":{"blocks":[[35.0,12.0,71.0,18.0],[-9.0,12.0,27.0,18.0],[35.0,-18.0,71.0,-12.0],[-9.0,-18.0,27.0,-12.0],[-35.0,32.0,-25.0,40.0],[-35.0,-40.0,-25.0,-32.0]],"beds":[],"puddles":[],"cams":[[-10.0,15.0],[-10.0,-15.0]],"snow":true,"rooms":[],"src":"fiche Training-Snow"},"5":{"blocks":[[-67.0,22.0,-7.0,40.0],[-67.0,-40.0,-7.0,-6.0],[-15.0,4.0,-7.0,22.0],[-15.0,-6.0,-7.0,-4.0],[-27.0,4.0,-23.0,22.0],[-27.0,-6.0,-23.0,-4.0],[10.0,14.0,20.0,24.0]],"beds":[],"puddles":[[74.0,0.0,3.5],[67.0,6.0,3.0],[67.0,-6.0,3.0],[-11.0,0.0,3.9]],"cams":[],"snow":false,"rooms":[],"src":"fiche Training-Prints"},"10":{"blocks":[[48.0,8.0,80.0,40.0],[48.0,-40.0,80.0,-8.0],[24.0,22.0,30.0,32.0],[24.0,-6.0,30.0,6.0],[24.0,-32.0,30.0,-22.0],[5.0,12.0,13.0,24.0],[5.0,-24.0,13.0,-12.0]],"beds":[],"puddles":[[-53.0,6.0,5.0]],"cams":[[31.0,0.0]],"snow":false,"rooms":[22.0,-22.0],"src":"fiche Training-Dark"},"6":{"blocks":[[48,6,80,40],[48,-40,80,-6]],"beds":[],"puddles":[],"cams":[],"snow":false,"rooms":[],"box":[-49,32],"src":"code (NpcTrainingLessons.cs, Le donut)"}};
+/* The guards' names by their id (the same in every recording): the sheets' sleepers and posts, matched by where they start. */
+const AGENT_NAMES = {14:'Brutus',15:'Gaston',16:'Igor',17:'Hector',29:'Norbert',30:'Lucien',32:'Raoul',33:'Bernard',34:'Yvon',35:'Marcel',36:'Sacha',37:'Dédé'};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 const fmtT = v => v.toFixed(1).replace('.', ',') + ' s';
 
 /* ---------- data ---------- */
-RUNS.forEach((r,i) => { r.id = i; r.capT = r.result === 'lost' ? r.duration : null; r.captorName = r.by ? r.by.replace('Capturé par ','').replace('.','') : null; });
+RUNS.forEach((r,i) => { r.id = i; r.capT = r.result === 'lost' ? r.duration : null; r.captorName = r.by ? r.by.replace('Capturé par ','').replace('.','') : null;
+  if (r.captorName) { const id = Object.keys(AGENT_NAMES).find(k => AGENT_NAMES[k] === r.captorName); if (id) r.captor = +id; } });
 const SESS = {}; // training -> [ [runs...] ] chronological, all sources (stable numbering)
 RUNS.forEach(r => { (SESS[r.training] ||= {}); (SESS[r.training][r.session] ||= []).push(r); });
 for (const t in SESS) SESS[t] = Object.keys(SESS[t]).sort().map(k => SESS[t][k].sort((a,b) => a.attempt - b.attempt));
@@ -349,11 +359,21 @@ function renderOverview(){
 function planSvg(t, inner){
   let s = `<svg viewBox="0 0 771 500" role="img" aria-label="Plan de l'entraînement ${t}">`;
   s += `<rect width="771" height="500" fill="var(--plan-bg)"/><rect x="62" y="86" width="647" height="352" fill="var(--plan-paper)"/><rect x="18" y="227" width="44" height="70" fill="var(--plan-paper)"/><rect x="709" y="227" width="44" height="70" fill="var(--plan-paper)"/>`;
-  if (t === 1) INNER1.forEach(b => s += `<rect x="${b[0]}" y="${b[1]}" width="${b[2]}" height="${b[3]}" fill="var(--plan-block)" stroke="var(--plan-line)" stroke-width=".6"/>`);
+  const g = GEO[t];
+  if (g) {
+    if (g.snow) s += `<rect x="62" y="86" width="647" height="352" fill="#25313c"/>`;
+    g.puddles.forEach(p => s += `<circle cx="${LX(p[0])}" cy="${LY(p[1])}" r="${p[2]*SCALE}" fill="#6fb3f0" opacity=".28"/>`);
+    g.blocks.forEach(b => { const x0 = LX(b[2]), x1 = LX(b[0]), y0 = LY(b[1]), y1 = LY(b[3]); s += `<rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="var(--plan-block)" stroke="var(--plan-line)" stroke-width=".6"/>`; });
+    g.beds.forEach(b => s += `<rect x="${LX(b[0]+4)}" y="${LY(b[1]-3)}" width="${8*SCALE}" height="${6*SCALE}" rx="3" fill="#2a3440" stroke="var(--plan-muted)" stroke-width=".8"/><rect x="${LX(b[0]-2.5)}" y="${LY(b[1]-2)}" width="${1.8*SCALE}" height="${4*SCALE}" rx="2" fill="var(--plan-muted)" opacity=".5"/>`);
+    (g.rooms||[]).forEach(cx => s += `<line x1="${LX(cx)}" y1="86" x2="${LX(cx)}" y2="438" stroke="var(--plan-line)" stroke-width="3" stroke-dasharray="40 18"/>`);
+    g.cams.forEach(c => s += `<rect x="${LX(c[0])-5}" y="${LY(c[1])-5}" width="10" height="10" fill="#6ea8e8" transform="rotate(45 ${LX(c[0])} ${LY(c[1])})"/>`);
+    if (g.box) s += `<rect x="${LX(g.box[0])-7}" y="${LY(g.box[1])-5}" width="14" height="10" rx="2" fill="#e9b44c"/><text x="${LX(g.box[0])}" y="${LY(g.box[1])+18}" fill="var(--plan-muted)" font-size="10" text-anchor="middle">donuts</text>`;
+  }
   OUTER.forEach(w => s += `<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}" stroke="var(--plan-line)" stroke-width="3.5" stroke-linecap="square"/>`);
   s += `<text x="40" y="318" fill="var(--plan-muted)" font-size="11" text-anchor="middle">ascenseur</text><text x="731" y="318" fill="var(--plan-muted)" font-size="11" text-anchor="middle">ascenseur</text>`;
   s += `<line x1="610" y1="474" x2="${610+25*SCALE}" y2="474" stroke="var(--plan-line)" stroke-width="2"/><text x="${610+12.5*SCALE}" y="467" fill="var(--plan-muted)" font-size="11" text-anchor="middle">5 m</text>`;
-  if (t !== 1) s += `<text x="385" y="72" fill="var(--plan-muted)" font-size="12" text-anchor="middle">Murs intérieurs à venir : plan de ce niveau à refaire par le jeu (décision 3)</text>`;
+  s += `<text x="20" y="72" fill="var(--plan-muted)" font-size="11.5">${g ? 'Vu comme dans le jeu · décor : ' + g.src : 'Décor pas encore relu pour ce niveau'}</text>`;
+  s += `<text x="20" y="478" fill="var(--plan-muted)" font-size="11">Orienté comme l'écran du jeu (caméra Yaw 180)</text>`;
   return s + inner + `</svg>`;
 }
 const pathD = (r, until) => { const pts = until == null ? r.path : r.path.filter(p => p[0] <= until); return pts.map(p => `${sx(p[1], r.training).toFixed(1)},${sy(p[2]).toFixed(1)}`).join(' '); };
@@ -381,7 +401,7 @@ function agentSvg(a, t, o={}){
     s += `<rect x="${x-10}" y="${y-6}" width="20" height="12" rx="2" fill="var(--plan-block)" stroke="var(--guard)" stroke-width="1.3"/><circle cx="${x-5}" cy="${y}" r="3.5" fill="var(--guard)"/>`;
     if (!o.static) s += `<text x="${x+8}" y="${y-8}" fill="var(--plan-muted)" font-size="10">z</text>`;
   } else {
-    const r = (a[4]||0) * SCALE, ang = -a[3], h = a[5] || .3;
+    const r = (a[4]||0) * SCALE, ang = dirOf(a[3]), h = a[5] || .3;
     if (r) s += `<path d="M${x},${y} L${x+r*Math.cos(ang-h)},${y+r*Math.sin(ang-h)} A${r},${r} 0 0 1 ${x+r*Math.cos(ang+h)},${y+r*Math.sin(ang+h)} Z" fill="${al ? 'var(--lost)' : 'var(--guard)'}" opacity="${sees ? .32 : .14}"/>`;
     s += `<circle cx="${x}" cy="${y}" r="7.5" fill="var(--guard)" stroke="var(--plan-bg)" stroke-width="2"/><line x1="${x}" y1="${y}" x2="${x+9*Math.cos(ang)}" y2="${y+9*Math.sin(ang)}" stroke="var(--plan-bg)" stroke-width="2"/>`;
   }
@@ -507,7 +527,7 @@ function eventsOf(r){
   if (r.result==='won') ev.push({t:r.duration, txt:`<b style="color:var(--good)">Sorti</b>`});
   return ev.sort((a,b) => a.t - b.t);
 }
-function namesOf(r){ const n = {}; if (r.captor != null && r.captorName) n[r.captor] = r.captorName; return n; }
+function namesOf(r){ return AGENT_NAMES; }
 function backlog(t){
   if (t === 2) return `<li><code>Dortoir</code> Après la 1re capture, un indice : « Ils dorment d'un œil : marchez. » <span class="chip ex">à décider</span></li><li><code>Dortoir</code> Revoir avec 5 vrais testeurs : comprennent-ils le réveil en chaîne ?</li>`;
   if (t === 6) return `<li><code>Banc</code> La partie du donut du 15 nov. ne se rejoue plus à l'identique (« hurry » différent dès la 1re image).</li>`;
